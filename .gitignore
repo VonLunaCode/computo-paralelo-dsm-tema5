@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+prueba/resultados_dsm.json
+presentacion/*.aux
+presentacion/*.log
+presentacion/*.nav
+presentacion/*.out
+presentacion/*.snm
+presentacion/*.toc
+presentacion/*.fls
+presentacion/*.fdb_latexmk

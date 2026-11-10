@@ -1,0 +1,52 @@
+{
+  "1": {
+    "host": "laptop-1",
+    "rtt_ms": 0.10082500011776574,
+    "lectura_local_us": 0.3009680899981504,
+    "falla_remota_ms": 0.221127000031629,
+    "misma_pagina": {
+      "seg": 3.000001741999995,
+      "incrementos": 1582476,
+      "por_seg": 527491.6937031574,
+      "fallos": 517,
+      "invalidaciones": 372,
+      "correcto": true,
+      "msgs_maestro": 2074
+    },
+    "paginas_distintas": {
+      "seg": 3.000001849,
+      "incrementos": 3822325,
+      "por_seg": 1274107.548058381,
+      "fallos": 0,
+      "invalidaciones": 0,
+      "correcto": true,
+      "msgs_maestro": 7
+    },
+    "duracion_s": 3.0
+  },
+  "2": {
+    "host": "laptop-1",
+    "rtt_ms": 0.06460899999183312,
+    "lectura_local_us": 0.31380232000174146,
+    "falla_remota_ms": 0.19868599997607816,
+    "misma_pagina": {
+      "seg": 3.000244298000098,
+      "incrementos": 1847132,
+      "por_seg": 615660.5317877817,
+      "fallos": 516,
+      "invalidaciones": 343,
+      "correcto": true,
+      "msgs_maestro": 2074
+    },
+    "paginas_distintas": {
+      "seg": 3.0000024900000426,
+      "incrementos": 3770529,
+      "por_seg": 1256841.956821158,
+      "fallos": 0,
+      "invalidaciones": 0,
+      "correcto": true,
+      "msgs_maestro": 9
+    },
+    "duracion_s": 3.0
+  }
+}

@@ -1,0 +1,525 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage[sfdefault]{FiraSans}
+\usepackage[scale=0.9]{FiraMono}
+\usepackage{fontawesome5}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,shadings}
+\usepackage{booktabs,array,listings,colortbl}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetheme{metropolis}
+\metroset{block=fill,numbering=fraction,progressbar=frametitle}
+
+% ------------------------------------------------------------ paleta oscuro tech
+\definecolor{fondo}{HTML}{14131C}
+\definecolor{panel}{HTML}{211F2E}
+\definecolor{panel2}{HTML}{2D2A40}
+\definecolor{texto}{HTML}{ECEAF5}
+\definecolor{tenue}{HTML}{A9A5C0}
+\definecolor{vl}{HTML}{A59EFF}
+\definecolor{menta}{HTML}{5EE6D0}
+\definecolor{ambar}{HTML}{FFC266}
+\definecolor{rojo}{HTML}{FF7A85}
+\definecolor{verde}{HTML}{7EE29A}
+
+\setbeamercolor{background canvas}{bg=fondo}
+\setbeamercolor{normal text}{fg=texto,bg=fondo}
+\setbeamercolor{structure}{fg=vl}
+\setbeamercolor{frametitle}{fg=texto,bg=panel}
+\setbeamercolor{progress bar}{fg=menta,bg=panel2}
+\setbeamercolor{progress bar in head/foot}{fg=menta,bg=panel2}
+\setbeamercolor{alerted text}{fg=ambar}
+\setbeamercolor{block title}{fg=vl,bg=panel2}
+\setbeamercolor{block body}{fg=texto,bg=panel}
+\setbeamercolor{block title alerted}{fg=ambar,bg=panel2}
+\setbeamercolor{block body alerted}{fg=texto,bg=panel}
+\setbeamercolor{itemize item}{fg=menta}
+\setbeamercolor{itemize subitem}{fg=vl}
+\setbeamercolor{enumerate item}{fg=vl}
+\setbeamercolor{description item}{fg=vl}
+\setbeamercolor{footline}{fg=tenue}
+\setbeamercolor{page number in head/foot}{fg=tenue}
+\setbeamerfont{block title}{series=\bfseries}
+\setbeamertemplate{frame footer}{\faNetworkWired\enspace Equipo 5 \textperiodcentered{} Memoria compartida distribuida}
+\arrayrulecolor{tenue!45!fondo}
+
+% fondo: cuadrícula de puntos muy tenue
+\setbeamertemplate{background}{%
+  \begin{tikzpicture}
+    \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
+    \foreach \x in {0.3,0.8,...,16}{\foreach \y in {0.3,0.8,...,9}{\fill[vl,opacity=.09] (\x,\y) circle (.4pt);}}
+  \end{tikzpicture}}
+
+\lstset{basicstyle=\ttfamily\scriptsize\color{texto},columns=fullflexible,
+  keywordstyle=\bfseries\color{vl},commentstyle=\color{tenue}\itshape,
+  emph={LEER,ESCRIBIR,INVALIDA,ACK,DATOS,R,W},emphstyle=\bfseries\color{menta},
+  morekeywords={si,return,para,en,sino,al,recibir,de},morecomment=[l]{//},
+  backgroundcolor=\color{panel},frame=leftline,framerule=2.5pt,rulecolor=\color{vl},
+  xleftmargin=.7em,framexleftmargin=.5em,aboveskip=.4em,belowskip=.4em}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% ------------------------------------------------------------ piezas gráficas
+% red decorativa de laptops
+\newcommand{\redDeco}[1]{%
+  \begin{scope}[#1]
+    \coordinate (n1) at (0,0);     \coordinate (n2) at (1.9,1.15);  \coordinate (n3) at (3.4,.1);
+    \coordinate (n4) at (1.4,-1.35);\coordinate (n5) at (3.1,-2.0);  \coordinate (n6) at (4.7,-1.0);
+    \coordinate (n7) at (.1,-2.7); \coordinate (n8) at (4.3,1.8);   \coordinate (n9) at (5.5,.45);
+    \coordinate (n10) at (1.9,-3.5);\coordinate (n11) at (5.0,-3.0); \coordinate (n12) at (.6,1.9);
+    \foreach \a/\b in {n1/n2,n2/n3,n1/n4,n4/n3,n3/n6,n4/n5,n5/n6,n2/n8,n8/n9,n3/n9,n6/n9,n4/n7,
+                       n7/n10,n5/n10,n5/n11,n6/n11,n3/n8,n12/n2,n12/n1}
+      {\draw[vl!55!fondo,line width=.9pt] (\a) -- (\b);}
+    \foreach \a/\b/\t in {n1/n2/.45,n3/n6/.6,n4/n5/.35,n8/n9/.5,n5/n11/.55}
+      {\fill[menta] ($(\a)!\t!(\b)$) circle (1.5pt);}
+    \foreach \n in {n2,n5,n7,n9,n10,n11,n12}
+      {\fill[vl,opacity=.25] (\n) circle (6pt); \fill[vl] (\n) circle (2.4pt);}
+    \foreach \n/\ic/\c in {n1/\faLaptop/menta,n4/\faLaptop/menta,n6/\faLaptop/menta,n8/\faLaptop/menta,n3/\faServer/ambar}
+      {\fill[\c,opacity=.14] (\n) circle (.62);
+       \node[circle,draw=\c,line width=1.1pt,fill=panel,text=\c,minimum size=.8cm,inner sep=0pt] at (\n) {\small\ic};}
+  \end{scope}}
+
+% barra de nivel (0-5)
+\newcommand{\nivel}[2]{\tikz[baseline=-.1ex]{\foreach \k in {1,...,5}{%
+  \ifnum\k>#1\relax\fill[panel2] (\k*.2,0) rectangle +(.15,.22);\else\fill[#2] (\k*.2,0) rectangle +(.15,.22);\fi}}}
+
+\tikzset{node/.style={draw=#1,fill=panel,line width=1pt,rounded corners=4pt,minimum width=3.4cm,minimum height=1.05cm,align=center,text=texto},
+  node/.default=vl,
+  box/.style={draw=#1,fill=panel,line width=1pt,rounded corners=4pt,align=center,minimum width=3.1cm,minimum height=.95cm,font=\footnotesize,text=texto}}
+\tikzset{stat/.style={rounded corners=6pt,fill=panel,draw=#1,line width=1.2pt,align=center,inner sep=7pt}}
+
+% secciones con expositor
+\newcommand{\exponente}{}
+\newcommand{\seccion}[2]{\renewcommand{\exponente}{#2}\section{#1}}
+
+\setbeamertemplate{section page}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \redDeco{shift={($(current page.north east)+(-6.1,-3.3)$)},opacity=.6}
+    \node[anchor=south west,inner sep=0pt,font=\fontsize{66}{66}\selectfont\bfseries,text=vl]
+      (num) at ($(current page.west)+(1.1,.35)$) {0\insertsectionnumber};
+    \draw[menta,line width=2pt] ($(num.south west)+(0,-.25)$) -- ++(2.0,0);
+    \node[anchor=north west,inner sep=0pt,text width=8.2cm,font=\LARGE\bfseries,text=texto]
+      (tit) at ($(num.south west)+(0,-.55)$) {\insertsectionhead};
+    \node[anchor=north west,inner sep=0pt,text=ambar] at ($(tit.south west)+(0,-.35)$) {\faUser\enspace Expone: \exponente};
+  \end{tikzpicture}}
+
+\title{Memoria compartida distribuida y modelos de consistencia}
+\subtitle{Cómputo paralelo -- Tema 5}
+\author[Equipo 5]{Ever Garcia Ramirez, Christian Luna Ortiz, Marcelino Parra Hernández, José José Varela Palacios}
+\date{10 de noviembre de 2026}
+
+\begin{document}
+
+% ============================================================ PORTADA
+\begin{frame}[plain]
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[panel] (current page.south west) rectangle ($(current page.south east)+(0,1.75)$);
+    \fill[vl] ($(current page.south west)+(0,1.75)$) rectangle ($(current page.south east)+(0,1.79)$);
+    \redDeco{shift={($(current page.north east)+(-5.75,-2.75)$)},scale=.93}
+    \node[anchor=north west,text width=9.4cm,inner sep=0pt] at ($(current page.north west)+(1,-1.15)$) {%
+      {\color{menta}\footnotesize\bfseries\faNetworkWired\enspace CÓMPUTO PARALELO Y DISTRIBUIDO \textperiodcentered{} TEMA 5}\par\vspace{.55em}
+      {\fontsize{25}{29}\selectfont\bfseries\color{texto}Memoria compartida\\distribuida\par}\vspace{.3em}
+      {\Large\color{vl}y modelos de consistencia\par}\vspace{.7em}
+      {\color{vl}\rule{2.2cm}{2pt}}\par\vspace{.6em}
+      {\small\color{tenue}\faCalendar\enspace 10 de noviembre de 2026\qquad\faUsers\enspace Equipo 5}};
+    \node[anchor=west,text=texto,inner sep=0pt] at ($(current page.south west)+(1,.88)$) {%
+      \footnotesize\begin{tabular}{@{}l@{\hspace{2.6em}}l@{}}
+        {\color{menta}\faUser}\enspace Ever Garcia Ramirez & {\color{menta}\faUser}\enspace Christian Luna Ortiz\\[.25em]
+        {\color{menta}\faUser}\enspace Marcelino Parra Hernández & {\color{menta}\faUser}\enspace José José Varela Palacios
+      \end{tabular}};
+  \end{tikzpicture}
+\end{frame}
+
+% ============================================================ CONTENIDO
+\begin{frame}{Contenido}
+  \centering
+  \begin{tikzpicture}
+    \foreach \i/\t/\who in {1/{Qué es la DSM y cómo se simula}/Ever,
+                            2/{Esquemas: páginas, variables y objetos}/Christian,
+                            3/{Modelos de consistencia}/Marcelino,
+                            4/{Acceso del Equipo A a datos del Equipo B}/José,
+                            5/{Prueba real en un clúster de laptops}/Christian}{
+      \node[fill=panel,rounded corners=5pt,minimum width=12.8cm,minimum height=.92cm] at (0,-\i*1.08) {};
+      \fill[vl] (-6.4,-\i*1.08-.46) rectangle +(.07,.92);
+      \node[font=\large\bfseries,text=vl] at (-5.75,-\i*1.08) {0\i};
+      \node[anchor=west,text=texto] at (-5.15,-\i*1.08) {\t};
+      \node[anchor=east,text=ambar,font=\footnotesize] at (6.15,-\i*1.08) {\faUser\enspace\who};
+    }
+  \end{tikzpicture}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\seccion{Qué es la DSM y cómo se simula}{Ever}
+
+\begin{frame}{Dos formas de comunicar procesos}
+  \begin{columns}[T]
+    \column{.48\textwidth}
+    \begin{block}{\faMemory\enspace Memoria compartida}
+      \begin{itemize}
+        \item Procesos leen y escriben en un mismo espacio de direcciones.
+        \item Programación simple.
+        \item Requiere hardware común (multiprocesador).
+      \end{itemize}
+    \end{block}
+    \column{.48\textwidth}
+    \begin{block}{\faEnvelope\enspace Paso de mensajes (MPI)}
+      \begin{itemize}
+        \item Cada nodo tiene memoria propia.
+        \item Comunicación explícita: \texttt{send}/\texttt{recv}.
+        \item Escala en clústeres de computadoras separadas.
+      \end{itemize}
+    \end{block}
+  \end{columns}
+  \vspace{.9em}
+  {\color{ambar}\faLightbulb}\enspace\alert{Pregunta:} ¿podemos tener la comodidad de la primera sobre el hardware de la segunda?
+\end{frame}
+
+\begin{frame}{Memoria compartida distribuida (DSM)}
+  \begin{itemize}
+    \item \textbf{Abstracción}: una capa de software que presenta a los procesos de varias computadoras \emph{un solo espacio de direcciones} compartido.
+    \item Por debajo, los datos viven en la memoria local de cada nodo y viajan por la red cuando se necesitan.
+  \end{itemize}
+  \begin{block}{\faCogs\enspace Cómo se simula}
+    \begin{enumerate}
+      \item Se divide el espacio compartido en unidades (páginas, variables u objetos).
+      \item Se registra qué nodo tiene cada unidad (directorio).
+      \item Un acceso a una unidad remota se intercepta y se resuelve por la red.
+      \item Se guardan copias locales y se mantienen coherentes.
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Problemas que hay que resolver}
+  \begin{itemize}\setlength{\itemsep}{.55em}
+    \item[\textcolor{ambar}{\faClock}] \textbf{Latencia}: acceder a un dato remoto cuesta órdenes de magnitud más que uno local.
+    \item[\textcolor{ambar}{\faSearch}] \textbf{Localización}: ¿quién tiene la copia actual? (directorio central o distribuido).
+    \item[\textcolor{ambar}{\faCopy}] \textbf{Replicación}: copias múltiples aceleran lecturas, pero complican las escrituras.
+    \item[\textcolor{ambar}{\faIcon{sync-alt}}] \textbf{Coherencia y consistencia}: qué valor ve cada proceso y en qué orden.
+    \item[\textcolor{ambar}{\faRandom}] \textbf{Falso compartimiento}: dos variables distintas en la misma unidad provocan tráfico innecesario.
+  \end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\seccion{Esquemas: páginas, variables y objetos}{Christian}
+
+\begin{frame}{Tres granularidades}
+  \centering\small
+  \begin{tabular}{@{}>{\color{menta}\bfseries}L{2.1cm}L{3.5cm}L{3.5cm}L{3.5cm}@{}}
+    \toprule
+    & {\color{vl}\faIcon{file-alt}}\enspace\textbf{Páginas} & {\color{vl}\faTag}\enspace\textbf{Variables} & {\color{vl}\faCubes}\enspace\textbf{Objetos} \\ \midrule
+    Unidad & Página de memoria virtual (p.~ej. 4~KB) & Variable compartida declarada & Objeto con operaciones \\[.25em]
+    Detección & Falla de página (MMU) & Compilador o biblioteca & Invocación de método \\[.25em]
+    Ejemplos & IVY, TreadMarks & Munin & Orca, Linda (tuplas) \\[.25em]
+    Ventaja & Transparente, sin cambiar el programa & Grano fino, menos falso compartimiento & Encapsula datos y coherencia \\[.25em]
+    Desventaja & Falso compartimiento & Hay que anotar el código & Modelo de programación nuevo \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{DSM basada en páginas}
+  \begin{itemize}
+    \item Se aprovecha la MMU: las páginas remotas se marcan como \emph{no presentes} o de \emph{solo lectura}.
+    \item Una falla de página dispara el protocolo de DSM, que trae la página y reintenta el acceso.
+    \item Un \emph{dueño} (o gestor) conoce el estado de cada página: lectura compartida o escritura exclusiva.
+  \end{itemize}
+  \begin{block}{\faIcon{shield-alt}\enspace Coherencia típica}
+    \begin{itemize}
+      \item \textbf{Escritura-invalidación}: antes de escribir se invalidan las demás copias.
+      \item \textbf{Escritura-actualización}: la escritura se propaga a todas las copias.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{DSM basada en variables y en objetos}
+  \begin{columns}[T]
+    \column{.48\textwidth}
+    \begin{block}{\faTag\enspace Variables compartidas (Munin)}
+      \begin{itemize}
+        \item Solo se comparte lo declarado; cada variable usa el protocolo adecuado a su patrón (solo lectura, migratoria, productor-consumidor\ldots).
+        \item Cerrojos y barreras: los cambios se propagan al liberar.
+      \end{itemize}
+    \end{block}
+    \column{.48\textwidth}
+    \begin{block}{\faCubes\enspace Objetos (Orca, Linda)}
+      \begin{itemize}
+        \item Los datos solo se tocan mediante operaciones; el sistema replica o migra el objeto.
+        \item Operaciones atómicas: consistencia más simple.
+        \item Linda: se intercambian \emph{tuplas} con \texttt{out}, \texttt{in}, \texttt{rd}.
+      \end{itemize}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\seccion{Modelos de consistencia}{Marcelino}
+
+\begin{frame}{Coherencia vs.\ consistencia}
+  \begin{itemize}
+    \item \textbf{Coherencia}: qué valores puede devolver una lectura de \emph{una misma} ubicación.
+    \item \textbf{Consistencia}: en qué orden se ven las operaciones sobre \emph{distintas} ubicaciones.
+  \end{itemize}
+  \begin{alertblock}{\faHandshake\enspace Un modelo de consistencia es un contrato}
+    \begin{itemize}
+      \item Más estricto $\Rightarrow$ más fácil de programar, pero más lento (más mensajes y esperas).
+      \item Más relajado $\Rightarrow$ más rendimiento, pero el programador sincroniza explícitamente.
+    \end{itemize}
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Modelos de consistencia}
+  \begin{columns}[c]
+    \column{.07\textwidth}
+    \begin{tikzpicture}
+      \shade[top color=vl,bottom color=menta] (0,0) rectangle (.16,-4.6);
+      \fill[menta] (-.12,-4.6) -- (.28,-4.6) -- (.08,-4.95) -- cycle;
+      \node[above,font=\tiny\bfseries,text=vl,align=center] at (.08,0) {más\\estricto};
+      \node[below,font=\tiny\bfseries,text=menta,align=center] at (.08,-4.95) {más\\relajado};
+    \end{tikzpicture}
+    \column{.9\textwidth}
+    \small
+    \begin{description}\setlength{\itemsep}{.35em}
+      \item[Estricta] Toda lectura devuelve la última escritura en tiempo real. Imposible de lograr en una red real.
+      \item[Secuencial (Lamport)] El resultado es el de algún orden secuencial único que respeta el orden de cada proceso; todos ven el mismo orden.
+      \item[Causal] Solo se garantiza el orden de operaciones relacionadas causalmente; las concurrentes pueden verse en distinto orden.
+      \item[Débil / de liberación] El orden solo se garantiza en puntos de sincronización (\texttt{acquire}/\texttt{release}).
+      \item[Eventual] Si dejan de haber escrituras, todas las réplicas convergen con el tiempo.
+    \end{description}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Ejemplo: secuencial vs.\ causal}
+  \begin{columns}[T]
+    \column{.5\textwidth}
+    \begin{block}{\faCode\enspace Programa}
+      \texttt{P1: x = 1}\\
+      \texttt{P2: if (x == 1) y = 1}\\
+      \texttt{P3: lee y, luego x}
+    \end{block}
+    \textbf{Pregunta:} si P3 lee \texttt{y == 1}, ¿puede leer después \texttt{x == 0}?
+    \column{.5\textwidth}
+    \begin{itemize}\setlength{\itemsep}{.5em}
+      \item[\textcolor{verde}{\faTimesCircle}] \alert{Secuencial}: no. Todos ven el mismo orden.
+      \item[\textcolor{verde}{\faTimesCircle}] \alert{Causal}: no. \texttt{y=1} depende causalmente de \texttt{x=1}.
+      \item[\textcolor{rojo}{\faCheckCircle}] \alert{Eventual}: sí, momentáneamente.
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Comparación}
+  \centering
+  \begin{tabular}{@{}>{\bfseries}l l l l@{}}
+    \toprule
+    \textbf{Modelo} & \textbf{Facilidad} & \textbf{Rendimiento} & \textbf{Sincronización} \\ \midrule
+    Estricta           & \nivel{5}{vl}\enspace Máxima & \nivel{1}{menta}\enspace Muy bajo & No necesaria \\[.2em]
+    Secuencial         & \nivel{4}{vl}\enspace Alta   & \nivel{2}{menta}\enspace Bajo     & No necesaria \\[.2em]
+    Causal             & \nivel{3}{vl}\enspace Media  & \nivel{3}{menta}\enspace Medio    & Parcial \\[.2em]
+    Débil / liberación & \nivel{2}{vl}\enspace Baja   & \nivel{4}{menta}\enspace Alto     & Explícita \\[.2em]
+    Eventual           & \nivel{2}{vl}\enspace Baja   & \nivel{5}{menta}\enspace Muy alto & Lógica de aplicación \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\seccion{Acceso del Equipo A a datos del Equipo B}{José}
+
+\begin{frame}{Cómo accede el Equipo A a datos del Equipo B}
+  \centering
+  \begin{tikzpicture}[>={Stealth[length=2.4mm]}]
+    \node[node] (pa) at (0,2.3) {{\color{vl}\faCode}\enspace Proceso en A\\\texttt{x = lee(dir)}};
+    \node[node=menta] (dsm) at (0,0.5) {Capa DSM de A\\{\footnotesize\color{tenue}(directorio, caché)}};
+    \node[node=menta] (dsmb) at (8,0.5) {Capa DSM de B\\{\footnotesize\color{tenue}(directorio)}};
+    \node[node=verde] (mem) at (8,2.3) {{\color{verde}\faMemory}\enspace Memoria local de B\\{\footnotesize\color{tenue}(dato en \texttt{dir})}};
+    \node[draw=tenue!60!fondo,dashed,rounded corners=6pt,fit=(pa)(dsm),inner sep=7pt,
+          label={[text=menta,font=\footnotesize\bfseries]above:\faLaptop\ Nodo A}] {};
+    \node[draw=tenue!60!fondo,dashed,rounded corners=6pt,fit=(dsmb)(mem),inner sep=7pt,
+          label={[text=menta,font=\footnotesize\bfseries]above:\faLaptop\ Nodo B}] {};
+    \draw[->,tenue,line width=.9pt] (pa) -- node[right,font=\scriptsize]{1. acceso} (dsm);
+    \draw[->,menta,line width=1.1pt] ([yshift=4pt]dsm.east) -- node[above,font=\scriptsize]{2. solicitud por red} ([yshift=4pt]dsmb.west);
+    \draw[->,tenue,line width=.9pt] (dsmb) -- node[left,font=\scriptsize]{3. lee} (mem);
+    \draw[->,verde,line width=1.1pt] ([yshift=-4pt]dsmb.west) -- node[below,font=\scriptsize]{4. respuesta con el dato} ([yshift=-4pt]dsm.east);
+    \draw[->,dashed,verde,line width=.9pt] (dsm.north west) to[bend left=30] node[left,font=\scriptsize]{5. entrega} (pa.south west);
+    \node[font=\footnotesize,text=tenue] at (4,-1.05) {\faInfoCircle\enspace Para el proceso en A todo parece una lectura local de memoria.};
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}[fragile]{Pseudocódigo: lo que hace cada nodo}
+\begin{columns}[T]
+\column{.49\textwidth}
+\begin{lstlisting}
+leer(dir):
+  p = pagina(dir)
+  si p esta en cache:             // R o W
+      return cache[p][dir]
+  enviar(gestor, LEER, p)         // falla
+  datos = recibir(gestor)
+  cache[p] = (R, datos)           // copia
+  return cache[p][dir]
+\end{lstlisting}
+\column{.49\textwidth}
+\begin{lstlisting}
+escribir(dir, v):
+  p = pagina(dir)
+  si cache[p].modo != W:
+      // pedir propiedad EXCLUSIVA
+      enviar(gestor, ESCRIBIR, p)
+      datos = recibir(gestor)
+      cache[p] = (W, datos)
+  cache[p][dir] = v
+\end{lstlisting}
+\end{columns}
+\vspace{.4em}
+{\small{\color{ambar}\faLock}\enspace El nodo nunca escribe sin ser el único dueño: así dos escrituras simultáneas no se pisan.}
+\end{frame}
+
+\begin{frame}[fragile]{Pseudocódigo: el gestor (escritura-invalidación)}
+\begin{lstlisting}
+al recibir ESCRIBIR(p) de n:
+  si duenio[p] != ninguno y duenio[p] != n:
+      datos[p] = traer_e_invalidar(duenio[p], p)   // ultima version
+  para c en copias[p] - {n}:
+      enviar(c, INVALIDA, p);  esperar ACK de c     // nadie lee valores viejos
+  duenio[p] = n;  copias[p] = {}
+  responder(n, DATOS, datos[p], modo = W)
+
+al recibir LEER(p) de n:
+  si duenio[p] != ninguno:
+      datos[p] = traer(duenio[p], p)                // el dueno baja a modo R
+  copias[p] = copias[p] + {n}
+  responder(n, DATOS, datos[p], modo = R)
+\end{lstlisting}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\seccion{Prueba real en un clúster de laptops}{Christian}
+
+\begin{frame}{Nuestro clúster: maestro--trabajador}
+  \centering
+  \begin{tikzpicture}[>={Stealth[length=2.2mm]}]
+    \node[box=ambar] (m) at (0,2.5) {{\color{ambar}\faLaptop}\enspace\textbf{Laptop maestra}\\gestor DSM: directorio + páginas\\{\color{ambar}\texttt{192.168.1.10:5000}}};
+    \node[draw=vl,line width=1pt,circle,fill=panel,text=vl,minimum size=.95cm] (sw) at (0,.85) {\faWifi};
+    \node[box=menta] (w1) at (-4.6,-.65) {{\color{menta}\faLaptop}\enspace Trabajador 1\\{\color{menta}\faMicrochip\ CPU}\enspace\texttt{192.168.1.11}};
+    \node[box=verde] (w2) at (0,-.65) {{\color{verde}\faLaptop}\enspace Trabajador 2\\{\color{verde}\faBolt\ GPU}\enspace\texttt{192.168.1.12}};
+    \node[box=verde] (w3) at (4.6,-.65) {{\color{verde}\faLaptop}\enspace Trabajador 3\\{\color{verde}\faBolt\ GPU}\enspace\texttt{192.168.1.13}};
+    \draw[<->,menta,line width=1pt] (m) -- (sw);
+    \foreach \w in {w1,w2,w3} \draw[<->,menta,line width=1pt] (sw) -- (\w.north);
+    \node[font=\scriptsize,align=left,anchor=west,text=tenue] at (2.9,1.2) {{\color{menta}\faIcon{exchange-alt}}\ Sockets TCP:\\\texttt{LEER}, \texttt{ESCRIBIR},\\\texttt{INVALIDA}, \texttt{ACK}};
+  \end{tikzpicture}\par
+  \vspace{.4em}
+  {\footnotesize\color{tenue}Prototipo propio en Python (solo biblioteca estándar): DSM por páginas de 4~KB, gestor central y escritura-invalidación. IPs ilustrativas; las mediciones de las siguientes diapositivas se hicieron con este mismo programa.}
+\end{frame}
+
+\begin{frame}{Latencia: el costo de una falla de página}
+  \begin{block}{\faCalculator\enspace Modelo}
+    \[
+      T_{\text{falla}} \;\approx\; T_{\text{RTT}} + \frac{S_{\text{página}}}{B} + T_{\text{gestor}}
+      \qquad\qquad
+      \text{penalización} = \frac{T_{\text{falla}}}{T_{\text{local}}}
+    \]
+  \end{block}
+  \centering
+  \begin{tikzpicture}
+    \node[stat=menta,minimum width=6.3cm,minimum height=2.35cm] at (-3.45,0) {%
+      {\footnotesize\color{tenue}\faHome\enspace Misma máquina (\emph{loopback})}\\[4pt]
+      {\fontsize{28}{30}\selectfont\bfseries\color{menta}$\approx$\,700$\times$}\\[5pt]
+      {\scriptsize RTT 0.06--0.10 ms\quad\textperiodcentered\quad falla 0.21 ms}};
+    \node[stat=rojo,minimum width=6.3cm,minimum height=2.35cm] at (3.45,0) {%
+      {\footnotesize\color{tenue}\faGlobeAmericas\enspace Internet (laptop $\leftrightarrow$ servidor, Tailscale)}\\[4pt]
+      {\fontsize{28}{30}\selectfont\bfseries\color{rojo}$\approx$\,376\,000$\times$}\\[5pt]
+      {\scriptsize RTT 111 ms\quad\textperiodcentered\quad falla 113 ms}};
+  \end{tikzpicture}\\[.45em]
+  {\footnotesize\color{tenue}Veces más lento que una lectura local ($T_{\text{local}} \approx 0.30\,\mu$s, página ya en caché, en Python). La falla casi es solo $T_{\text{RTT}}$: \textcolor{ambar}{la red domina}.}
+\end{frame}
+
+\begin{frame}{Falso compartimiento, medido}
+  \begin{columns}[c]
+    \column{.55\textwidth}
+    \begin{tikzpicture}
+      \begin{axis}[ybar, ymode=log, log origin=infty, width=7.2cm, height=5.4cm,
+          symbolic x coords={Loopback,Internet}, xtick=data,
+          ylabel={incrementos/s (2 nodos)}, ylabel style={font=\scriptsize,text=tenue},
+          ymin=1e4, ymax=1e7, bar width=16pt, enlarge x limits=0.45,
+          axis line style={tenue}, tick style={tenue}, ymajorgrids, major grid style={panel2},
+          axis x line*=bottom, axis y line*=left,
+          legend style={font=\scriptsize,at={(.5,-.2)},anchor=north,legend columns=2,draw=none,fill=none,text=texto},
+          tick label style={font=\scriptsize,text=texto},
+          point meta=explicit symbolic, nodes near coords,
+          every node near coord/.append style={font=\scriptsize,text=texto}]
+        \addplot[fill=verde,draw=none] coordinates {(Loopback,2531000)[2.53\,M] (Internet,2520000)[2.52\,M]};
+        \addplot[fill=rojo,draw=none] coordinates {(Loopback,1143000)[1.14\,M] (Internet,33300)[33\,k]};
+        \legend{Páginas distintas, Misma página}
+      \end{axis}
+    \end{tikzpicture}
+    \column{.43\textwidth}
+    \footnotesize
+    Dos trabajadores incrementan \emph{cada uno su propia variable} al mismo tiempo.
+    \begin{itemize}
+      \item[\textcolor{verde}{\faCheckCircle}] Páginas distintas: $0$ fallas.
+      \item[\textcolor{rojo}{\faRandom}] Misma página: la página rebota entre nodos (invalidación tras invalidación).
+    \end{itemize}
+    \vspace{.3em}
+    \begin{tikzpicture}
+      \node[stat=ambar,minimum width=2.45cm,minimum height=1.45cm] at (0,0) {{\scriptsize\color{tenue}loopback}\\{\LARGE\bfseries\color{ambar}2.2$\times$}};
+      \node[stat=rojo,minimum width=2.45cm,minimum height=1.45cm] at (2.75,0) {{\scriptsize\color{tenue}internet}\\{\LARGE\bfseries\color{rojo}76$\times$}};
+    \end{tikzpicture}\\[.3em]
+    {\color{tenue}más lento con la misma página.} Resultado final correcto en todas las corridas.
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Balanceo CPU/GPU con DSM}
+  \begin{columns}[T]
+    \column{.48\textwidth}
+    \begin{block}{\faBalanceScale\enspace El dueño calcula (\emph{owner computes})}
+      \begin{itemize}
+        \item El maestro reparte \emph{páginas}, no tareas sueltas: cada nodo calcula sobre lo que ya tiene.
+        \item Laptops con GPU reciben bloques más grandes, en proporción a su velocidad medida.
+      \end{itemize}
+    \end{block}
+    \column{.48\textwidth}
+    \begin{block}{\faClipboardCheck\enspace Reglas que salen de la medición}
+      \begin{itemize}
+        \item Alinear los datos de cada nodo a \emph{su} página: evita el $76\times$.
+        \item La VRAM no forma parte de la DSM: el nodo copia su página a la GPU, calcula y escribe de vuelta.
+        \item Consistencia de liberación: enviar cambios en lotes al \texttt{release}, no en cada escritura.
+      \end{itemize}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Conclusiones}
+  \begin{itemize}\setlength{\itemsep}{.45em}
+    \item[\textcolor{menta}{\faCheck}] La DSM da la comodidad de memoria compartida sobre computadoras con memoria separada.
+    \item[\textcolor{menta}{\faCheck}] La elección de granularidad (páginas, variables, objetos) equilibra transparencia, falso compartimiento y esfuerzo de programación.
+    \item[\textcolor{menta}{\faCheck}] El modelo de consistencia es el compromiso central entre facilidad de uso y rendimiento.
+    \item[\textcolor{menta}{\faCheck}] Lo medimos: en red, una falla cuesta $\sim\!10^5$ veces una lectura local; acomodar los datos importa más que el procesador.
+    \item[\textcolor{menta}{\faCheck}] Por eso en clústeres reales domina el paso de mensajes (MPI): el costo de la red queda explícito.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Referencias}
+  \footnotesize
+  \begin{itemize}\setlength{\itemsep}{.4em}
+    \item[\textcolor{vl}{\faBook}] Tanenbaum, A. y Van Steen, M. \emph{Sistemas distribuidos: principios y paradigmas}.
+    \item[\textcolor{vl}{\faBook}] Li, K. y Hudak, P. (1989). Memory coherence in shared virtual memory systems. \emph{ACM TOCS}.
+    \item[\textcolor{vl}{\faBook}] Lamport, L. (1979). How to make a multiprocessor computer that correctly executes multiprocess programs. \emph{IEEE Trans.\ Computers}.
+    \item[\textcolor{vl}{\faBook}] Bennett, J. et al.\ (1990). Munin: distributed shared memory based on type-specific memory coherence. \emph{PPOPP}.
+    \item[\textcolor{vl}{\faBook}] Keleher, P. et al.\ (1994). TreadMarks: distributed shared memory on standard workstations and operating systems. \emph{USENIX}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+  \begin{tikzpicture}[remember picture,overlay]
+    \redDeco{shift={($(current page.north east)+(-5.75,-2.75)$)},scale=.93}
+    \node[anchor=west,inner sep=0pt] at ($(current page.west)+(1.1,.6)$) {%
+      \begin{minipage}{8cm}
+        {\fontsize{40}{44}\selectfont\bfseries\color{texto}¿Preguntas?\par}\vspace{.4em}
+        {\color{vl}\rule{2.2cm}{2pt}}\par\vspace{.6em}
+        {\large\color{menta}Gracias\par}\vspace{.4em}
+        {\small\color{tenue}Equipo 5 \textperiodcentered{} Memoria compartida distribuida}
+      \end{minipage}};
+  \end{tikzpicture}
+\end{frame}
+
+\end{document}
